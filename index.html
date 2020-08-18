@@ -24,6 +24,81 @@ src="https://unpkg.com/@google/model-viewer/dist/model-viewer-legacy.js"></scrip
 </head>
 <body>
 
+	<script>
+      function Sync(selector, audioSelector) {
+        var modelViewer = document.querySelector(selector);
+        var sound = document.querySelector(audioSelector);
+        var playRequest = document.querySelector("#overlay");
+
+        sound.addEventListener("timeupdate", () => {
+          modelViewer.currentTime = sound.currentTime;
+          console.log("modelViewer time: " + modelViewer.currentTime);
+        });
+
+        sound.addEventListener("pause", () => {
+          modelViewer.pause();
+        });
+
+        sound.addEventListener("play", () => {
+          modelViewer.play();
+
+          playRequest.classList.add("hide");
+        });
+
+        document.addEventListener("visibilitychange", () => {
+          if (document.visibilityState !== "visible") {
+            sound.pause();
+          }
+        });
+
+        var promise = sound.play();
+        if (promise !== undefined) {
+          promise
+            .then(_ => {
+              console.log("Autoplay has worked");
+              playRequest.classList.add("hide");
+            })
+            .catch(error => {
+              // Show a "Play" button so that user can start playback.
+              console.log("Autoplay has not worked");
+
+              // show the modal dialogue to play this
+              playRequest.classList.remove("hide");
+            });
+        }
+
+        // this is needed because modelViewer.currentTime does not update when paused
+        // https://github.com/google/model-viewer/issues/1113
+        function enforceTime() {
+          if (modelViewer === undefined)
+            modelViewer = document.querySelector(selector);
+
+          if (sound.paused) modelViewer.currentTime = sound.currentTime;
+
+          // need to enforce play
+          if (modelViewer.paused && typeof modelViewer.play === "function")
+            modelViewer.play();
+
+          requestAnimationFrame(enforceTime);
+        }
+
+        requestAnimationFrame(enforceTime);
+      }
+
+      function playNow() {
+        var playRequest = document.querySelector("#overlay");
+        playRequest.classList.add("hide");
+
+        var sound = document.querySelector("#sound");
+        sound.play();
+      }
+
+      function jumpTo(time) {
+        var sound = document.querySelector("#sound");
+        sound.currentTime = time;
+      }
+    </script>
+	
 	<!-- Banner + link de direcionamento -->	
 <a href="https://vmilagres.com.br/Chave_perdao2/">
 <img src="assets/imagem banner.jpg"/></a>
@@ -43,6 +118,42 @@ src="https://unpkg.com/@google/model-viewer/dist/model-viewer-legacy.js"></scrip
                   auto-rotate ar
                   camera-orbit="0.0rad 1.7rad auto">       
 </model-viewer>
+	
+	</model-viewer>
+      <section class="attribution">
+        <div>
+          <span>
+            <h1>Cute Penguin</h1>
+            <span
+              ><audio controls autoplay loop id="sound">
+                <source
+                  src="https://cdn.glitch.com/7d7e8236-5fa5-4809-ab74-eb6bf2bef1c6%2FPenguin_Emperor_Unisex_Adult.mp3?v=1580308441912"
+                  type="audio/mpeg"
+                />
+                <source
+                  src="https://cdn.glitch.com/7d7e8236-5fa5-4809-ab74-eb6bf2bef1c6%2FPenguin_Emperor_Unisex_Adult.ogg?v=1580245082333"
+                  type="audio/ogg"
+                /></audio
+            ></span>
+          </span>
+        </div>
+        <div id="timesteps">
+          <button onclick="jumpTo(0)">0s</button>
+          <button onclick="jumpTo(5)">5s</button>
+          <button onclick="jumpTo(10)">10s</button>
+          <button onclick="jumpTo(15)">15s</button>
+          <button onclick="jumpTo(20)">20s</button>
+        </div>
+      </section>
+
+      <script>
+        window.addEventListener("load", () => {
+          Sync("#model-viewer", "#sound");
+        });
+      </script>
+    </div>
+
+
 	
 	<!-- iframe soundcloud: --> 
 <iframe width="100%" height="50" scrolling="no" frameborder="no" allow="autoplay" 
