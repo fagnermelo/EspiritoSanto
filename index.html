@@ -44,14 +44,39 @@ src="https://unpkg.com/@google/model-viewer/dist/model-viewer-legacy.js"></scrip
                   camera-orbit="0.0rad 1.7rad auto">       
 </model-viewer>
 
-      <script>
-        window.addEventListener("load", () => {
-          Sync("#model-viewer", "#sound");
-        });
-      </script>
-    </div>
-
-
+   </model-viewer>
+    <section class="attribution">
+      <span>
+        <h1>Cute Penguin</h1>
+        <span><audio controls autoplay loop id="sound">
+              <source src="https://prefrontalcortex.de/labs/model-viewer/penguin-audio/Penguin_Emperor_Unisex_Adult.mp3" type="audio/mpeg">
+              <source src="https://prefrontalcortex.de/labs/model-viewer/penguin-audio/Penguin_Emperor_Unisex_Adult.ogg" type="audio/ogg">
+          </audio></span>
+      </span>
+    </section>
+  <script>
+    
+    (() => {
+        var checkExist = setInterval(function() {
+          // return;
+          if (document.querySelector("#model-viewer") != null) {
+            modelViewer = document.querySelector("#model-viewer");
+            sound = document.querySelector("#sound");
+            
+            sound.addEventListener('timeupdate', () => {
+              modelViewer.currentTime = sound.currentTime;
+            });
+            
+            sound.play();
+            
+            clearInterval(checkExist);
+          }
+        }, 100);
+      })();
+    
+  
+  </script>  
+  </div>
 	
 	<!-- iframe soundcloud: --> 
 <iframe width="100%" height="50" scrolling="no" frameborder="no" allow="autoplay" 
